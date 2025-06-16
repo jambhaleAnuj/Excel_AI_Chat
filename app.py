@@ -93,14 +93,27 @@ uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
 if uploaded_file:
     st.success("File uploaded successfully!")
 
+    # Cache agents in session_state
+    if 'main_agent' not in st.session_state:
+        with st.spinner("Setting up the agent..."):
+            try:
+                main_agent, comments_agent = create_agents(uploaded_file)
+                st.session_state['main_agent'] = main_agent
+                st.session_state['comments_agent'] = comments_agent
+            except Exception as e:
+                st.error(f"Agent setup failed: {e}")
+                st.stop()
+    else:
+        main_agent = st.session_state['main_agent']
+        comments_agent = st.session_state['comments_agent']
+
+    # Accept user query
     query = st.text_input("Enter your question about the data:")
 
     if query:
         with st.spinner("Processing your query..."):
             try:
-                main_agent, comments_agent = create_agents(uploaded_file)
                 result = handle_user_query(query, main_agent, comments_agent)
-                st.write("### Response:")
                 st.write("### Response:")
 
                 # Try to parse result into a DataFrame
@@ -108,7 +121,7 @@ if uploaded_file:
                     from io import StringIO
                     result_df = pd.read_csv(StringIO(result))
                     st.dataframe(result_df, use_container_width=True)
-                except:
+                except Exception:
                     st.write(result)
 
             except Exception as e:
