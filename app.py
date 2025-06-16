@@ -1,13 +1,12 @@
 import os
 import streamlit as st
 import pandas as pd
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from langchain_google_genai import ChatGoogleGenerativeAI
 import tempfile
 
 # Set up Google API Key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyDIYgJ01me6YE6yAzaJkyeZx3jHGxWKAR0"
-
-# os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-
 
 # Define helper functions
 def get_enriched_prompt(query):
@@ -48,8 +47,6 @@ def get_enriched_prompt(query):
 
 
 def create_agents(excel_file):
-    from langchain_experimental.agents.agent_toolkits import create_csv_agent
-    from langchain_google_genai import ChatGoogleGenerativeAI
     df = pd.read_excel(excel_file, dtype=str)
 
     # Strip leading/trailing whitespaces from all string cells
@@ -96,27 +93,14 @@ uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
 if uploaded_file:
     st.success("File uploaded successfully!")
 
-    # Cache agents in session_state
-    if 'main_agent' not in st.session_state:
-        with st.spinner("Setting up the agent..."):
-            try:
-                main_agent, comments_agent = create_agents(uploaded_file)
-                st.session_state['main_agent'] = main_agent
-                st.session_state['comments_agent'] = comments_agent
-            except Exception as e:
-                st.error(f"Agent setup failed: {e}")
-                st.stop()
-    else:
-        main_agent = st.session_state['main_agent']
-        comments_agent = st.session_state['comments_agent']
-
-    # Accept user query
     query = st.text_input("Enter your question about the data:")
 
     if query:
         with st.spinner("Processing your query..."):
             try:
+                main_agent, comments_agent = create_agents(uploaded_file)
                 result = handle_user_query(query, main_agent, comments_agent)
+                st.write("### Response:")
                 st.write("### Response:")
 
                 # Try to parse result into a DataFrame
@@ -124,7 +108,7 @@ if uploaded_file:
                     from io import StringIO
                     result_df = pd.read_csv(StringIO(result))
                     st.dataframe(result_df, use_container_width=True)
-                except Exception:
+                except:
                     st.write(result)
 
             except Exception as e:
