@@ -6,9 +6,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import tempfile
 
 # Set up Google API Key
-# os.environ["GOOGLE_API_KEY"] = "AIzaSyDIYgJ01me6YE6yAzaJkyeZx3jHGxWKAR0"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyDIYgJ01me6YE6yAzaJkyeZx3jHGxWKAR0"
 
-os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+# os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 
 
 # Define helper functions
