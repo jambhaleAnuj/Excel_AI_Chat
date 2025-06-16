@@ -16,7 +16,7 @@ A Streamlit web app that allows you to upload an Excel file and ask questions ab
 
 ### 1. Clone the Repository
 ```powershell
-git clone <repository-url>
+git clone https://github.com/jambhaleAnuj/Excel_AI_Chat.git
 cd Excel_chat_streamlit 
 ```
 
