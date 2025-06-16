@@ -1,8 +1,6 @@
 import os
 import streamlit as st
 import pandas as pd
-from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain_google_genai import ChatGoogleGenerativeAI
 import tempfile
 
 # Set up Google API Key
@@ -50,6 +48,8 @@ def get_enriched_prompt(query):
 
 
 def create_agents(excel_file):
+    from langchain_experimental.agents.agent_toolkits import create_csv_agent
+    from langchain_google_genai import ChatGoogleGenerativeAI
     df = pd.read_excel(excel_file, dtype=str)
 
     # Strip leading/trailing whitespaces from all string cells
