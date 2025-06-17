@@ -64,7 +64,9 @@ def create_agents(excel_file):
         df_comments.to_csv(temp_comments.name, index=False)
 
     # Initialize LLM
-    llm = ChatGoogleGenerativeAI(model="gemma-3-27b-it")
+    # llm = ChatGoogleGenerativeAI(model="gemma-3-27b-it")
+    llm = ChatGoogleGenerativeAI(model="gemma-3n-e4b-it")
+
 
     # Create agents
     main_agent = create_csv_agent(llm, temp_main.name, verbose=False, allow_dangerous_code=True)
