@@ -65,7 +65,7 @@ def create_agents(excel_file):
 
     # Initialize LLM
     # llm = ChatGoogleGenerativeAI(model="gemma-3-27b-it")
-    llm = ChatGoogleGenerativeAI(model="gemma-3n-e4b-it")
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
 
 
     # Create agents
