@@ -132,6 +132,7 @@ if uploaded_file:
     query = st.chat_input("Enter your question about the data:")
 
     if query:
+        st.chat_message("user").write(query)
         with st.spinner("Processing your query..."):
             try:
                 main_agent, comments_agent = create_agents(uploaded_file)
