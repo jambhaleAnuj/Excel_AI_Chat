@@ -7,8 +7,25 @@ import tempfile
 from io import StringIO
 import re
 
+import json
+from pathlib import Path
+
 # Set up Google API Key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyDIYgJ01me6YE6yAzaJkyeZx3jHGxWKAR0"
+
+# --- File Path for History ---
+HISTORY_FILE = Path("chat_history.json")
+
+# --- Load/Save Chat History ---
+def load_chat_history():
+    if HISTORY_FILE.exists():
+        with open(HISTORY_FILE, "r") as f:
+            return json.load(f)
+    return []
+
+def save_chat_history(history):
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
 
 # Define helper functions
 # def get_enriched_prompt(query):
@@ -64,7 +81,7 @@ def create_agents(excel_file):
         df_comments.to_csv(temp_comments.name, index=False)
 
     # Initialize LLM
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20",temperature=0.5)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
 
     # Create agents
     main_agent = create_csv_agent(
@@ -147,9 +164,14 @@ def clean_llm_output(text: str) -> str:
 # ---------- Streamlit UI ----------
 st.title("📊 RMG ChatBot")
 
-# Initialize chat history
+# Load history
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+    st.session_state.chat_history = load_chat_history()
+
+
+# # Initialize chat history
+# if "chat_history" not in st.session_state:
+#     st.session_state.chat_history = []
 
 # Sidebar for chat history
 with st.sidebar:
@@ -158,9 +180,19 @@ with st.sidebar:
         with st.expander(f"Q{i+1}: {chat['user'][:30]}..."):
             st.markdown(f"**User:** {chat['user']}")
             st.markdown(f"**Assistant:** {chat['assistant']}")
+            # Unique key per delete button
+            if st.button("🗑️ Delete This Chat", key=f"delete_{i}"):
+                # Delete and save
+                st.session_state.chat_history.pop(i)
+                save_chat_history(st.session_state.chat_history)
+                st.rerun()  # Refresh the sidebar to reflect change
+
 
     if st.sidebar.button("🗑️ Clear Chat History"):
         st.session_state.chat_history = []
+        if HISTORY_FILE.exists():
+            HISTORY_FILE.unlink()
+        st.rerun()
 
 uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
 
@@ -195,6 +227,8 @@ if uploaded_file:
                     'user': query,
                     'assistant': result
                 })
+                save_chat_history(st.session_state.chat_history)
+
 
             except Exception as e:
                 st.error(f"Error: {e}")
