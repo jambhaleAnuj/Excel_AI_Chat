@@ -37,6 +37,8 @@ def get_enriched_prompt(query):
         context = (
             "You are a data analyst with access to a dataset. "
             "Respond to the user's query in natural language. "
+            "If My Query asks for comment. Do not truncate the comment. Do not add your own explanation. Just return the full comment."
+            "Ensure exact match filtering where possible by converting both dataset values and user inputs to lowercase and trimming whitespace."
             "Only use CSV format if the user explicitly asks for tabular or structured output."
         )
 
