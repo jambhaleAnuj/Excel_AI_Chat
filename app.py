@@ -145,7 +145,7 @@ def clean_llm_output(text: str) -> str:
 
 
 # ---------- Streamlit UI ----------
-st.title("📊 Excel Q&A Agent with Comments Support")
+st.title("📊 RMG ChatBot")
 
 # Initialize chat history
 if "chat_history" not in st.session_state:
