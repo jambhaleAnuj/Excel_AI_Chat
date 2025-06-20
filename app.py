@@ -42,12 +42,14 @@ def get_enriched_prompt(query):
     query_lower = query.lower()
 
     # Keywords that *strongly* imply needing tabular output
-    csv_keywords = ["list", "show", "filter", "table", "display", "all employees", "summary of", "csv"]
+    csv_keywords = ["list", "show", "filter", "table", "display", "all employees", "summary of", "csv","tabular", "structured"]
 
     if any(kw in query_lower for kw in csv_keywords):
         context = (
             "You are a data analyst with access to a dataset. "
-            "For this query, return the results in CSV format with headers. "
+            "For this query, return the results **strictly** in CSV format with headers as the first row. "
+            "Use comma `,` as the separator, and ensure each row corresponds to one record. "
+            "Do not add extra explanation or notes. Only output the CSV data."
             "Ensure exact match filtering where possible by converting both dataset values and user inputs to lowercase and trimming whitespace."
         )
     else:
