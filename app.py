@@ -42,15 +42,27 @@ def get_enriched_prompt(query):
     query_lower = query.lower()
 
     # Keywords that *strongly* imply needing tabular output
-    csv_keywords = ["list", "show", "filter", "table", "display", "all employees", "summary of", "csv","tabular", "structured"]
+    csv_keywords = ["list", "show", "filter", "table", "display", "all employees", "summary of", "csv","tabular", "structured", "answer in table format", "answer in csv format", "answer in tabular format", "answer in structured format"]
 
     if any(kw in query_lower for kw in csv_keywords):
         context = (
-            "You are a data analyst with access to a dataset. "
-            "For this query, return the results **strictly** in CSV format with headers as the first row. "
-            "Use comma `,` as the separator, and ensure each row corresponds to one record. "
-            "Do not add extra explanation or notes. Only output the CSV data."
-            "Ensure exact match filtering where possible by converting both dataset values and user inputs to lowercase and trimming whitespace."
+            # "You are a data analyst with access to a dataset. "
+            # "For this query, you MUST return the results **strictly** in CSV format with headers as the first row. "
+            # "Use comma `,` as the separator, and ensure each row corresponds to one record. "
+            # "DO NOT add any explanations, notes, or markdown formatting. Output only the CSV content."
+            # "Ensure exact match filtering where possible by converting both dataset values and user inputs to lowercase and trimming whitespace."
+            # "Even if the answer is a single record, return it in CSV format with headers."
+            # "Each line is a separate row.\n\n"
+            # "**Example:**\nEmployee Name\nJohn Doe\nJane Smith\nRobert Brown\n\n"
+            # "For this query, return the result in CSV format ONLY, with no explanation or markdown. "
+             "You are a data analyst with access to a dataset. "
+        "Return the result **strictly** in CSV format. "
+        "Use a comma `,` as the separator. Start the output with a header row. "
+        "Do NOT include any explanations or markdown formatting. "
+        "Return the CSV inside a code block marked with ```csv and ``` so that it is easy to extract."
+        "Example:\n```csv\nEmployee Name\nJohn Doe\nJane Smith\n```\n"
+        "Ensure exact matching by converting both dataset and input to lowercase and removing whitespace.\n"
+
         )
     else:
         context = (
@@ -75,8 +87,8 @@ def create_agents(excel_file):
     temp_main = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
     temp_comments = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
 
-    df_main = df.drop(columns=['Comments'], errors='ignore')
-    df_comments = df[['Employee Name', 'Comments']] if 'Comments' in df.columns else pd.DataFrame()
+    df_main = df.drop(columns=['RMG Comments'], errors='ignore')
+    df_comments = df[['Employee Name', 'RMG Comments']] if 'RMG Comments' in df.columns else pd.DataFrame()
 
     df_main.to_csv(temp_main.name, index=False)
     if not df_comments.empty:
@@ -219,7 +231,7 @@ if uploaded_file:
                 parsed_df = try_parse_csv(result)
 
                 if parsed_df is not None:
-                    st.dataframe(parsed_df, use_container_width=True)
+                    st.dataframe(parsed_df.reset_index(drop=True).rename(lambda x: x + 1, axis="index"), use_container_width=True)
                 else:
                     st.info("The response is likely a summary or natural language answer:")
                     st.chat_message("assistant").write(result)
