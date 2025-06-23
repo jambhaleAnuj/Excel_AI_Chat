@@ -176,6 +176,48 @@ def clean_llm_output(text: str) -> str:
 
 
 # ---------- Streamlit UI ----------
+st.markdown("""
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .title {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        .chat-message.user {
+            background-color: rgba(33, 150, 243, 0.1);
+            border-left: 5px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: inherit;
+        }
+        .chat-message.assistant {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 5px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: inherit;
+        }
+        .sidebar-title {
+            background-color: #3f51b5;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 st.title("📊 RMG ChatBot")
 
 # Load history
@@ -189,35 +231,37 @@ if "chat_history" not in st.session_state:
 
 # Sidebar for chat history
 with st.sidebar:
-    st.header("💬 Chat History")
+    st.markdown('<div class="sidebar-title">🕘 Chat History</div>', unsafe_allow_html=True)
+
     for i, chat in enumerate(st.session_state.chat_history):
-        with st.expander(f"Q{i+1}: {chat['user'][:30]}..."):
-            st.markdown(f"**User:** {chat['user']}")
-            st.markdown(f"**Assistant:** {chat['assistant']}")
-            # Unique key per delete button
-            if st.button("🗑️ Delete This Chat", key=f"delete_{i}"):
-                # Delete and save
+        with st.expander(f"📌 Q{i+1}: {chat['user'][:30]}..."):
+            st.markdown(f"<div class='chat-message user'><strong>User:</strong><br>{chat['user']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='chat-message assistant'><strong>Assistant:</strong><br>{chat['assistant']}</div>", unsafe_allow_html=True)
+            if st.button("🗑️ Delete This", key=f"delete_{i}"):
                 st.session_state.chat_history.pop(i)
                 save_chat_history(st.session_state.chat_history)
-                st.rerun()  # Refresh the sidebar to reflect change
+                st.rerun()
 
-
-    if st.sidebar.button("🗑️ Clear Chat History"):
+    st.markdown("---")
+    if st.button("🧹 Clear All History"):
         st.session_state.chat_history = []
         if HISTORY_FILE.exists():
             HISTORY_FILE.unlink()
         st.rerun()
 
-uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
+with st.container():
+    st.markdown("<div class='file-upload-box'><b>📂 Upload Excel File</b></div>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    st.success("File uploaded successfully!")
-
+    
+    st.success("✅ File uploaded Successfully! Ask your questions below.")
+    st.markdown("---")
     query = st.chat_input("Enter your question about the data:")
 
     if query:
         st.chat_message("user").write(query)
-        with st.spinner("Processing your query..."):
+        with st.spinner("🤖 Thinking..."):
             try:
                 # main_agent, comments_agent = create_agents(uploaded_file)
                 # result = handle_user_query(query, main_agent, comments_agent)
@@ -230,11 +274,13 @@ if uploaded_file:
                 # Try parsing CSV
                 parsed_df = try_parse_csv(result)
 
-                if parsed_df is not None:
-                    st.dataframe(parsed_df.reset_index(drop=True).rename(lambda x: x + 1, axis="index"), use_container_width=True)
-                else:
-                    st.info("The response is likely a summary or natural language answer:")
-                    st.chat_message("assistant").write(result)
+                with st.chat_message("assistant"):
+                    
+                    if parsed_df is not None:
+                        st.dataframe(parsed_df.reset_index(drop=True).rename(lambda x: x + 1, axis="index"), use_container_width=True)
+                    else:
+                        st.info("The response is likely a summary or natural language answer:")
+                        st.write(result)
 
                 # Store in chat history
                 st.session_state.chat_history.append({
