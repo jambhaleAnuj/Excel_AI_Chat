@@ -81,11 +81,15 @@ def create_agents(excel_file):
     df = pd.read_excel(excel_file, dtype=str)
 
     # Strip leading/trailing whitespaces from all string cells
-    df = df.applymap(lambda x: x.strip().lower() if isinstance(x, str) else x)
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
     # Create temporary CSVs
-    temp_main = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
-    temp_comments = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    # temp_main = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    # temp_comments = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    temp_main = tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode='w', newline='')
+    temp_comments = tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode='w', newline='')
+
+
 
     df_main = df.drop(columns=['RMG Comments'], errors='ignore')
     df_comments = df[['Employee Name', 'RMG Comments']] if 'RMG Comments' in df.columns else pd.DataFrame()
@@ -93,18 +97,18 @@ def create_agents(excel_file):
     df_main.to_csv(temp_main.name, index=False)
     if not df_comments.empty:
         df_comments.to_csv(temp_comments.name, index=False)
-
+    
     # Initialize LLM
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-05-20")
 
     # Create agents
     main_agent = create_csv_agent(
-        llm, temp_main.name, verbose=False, allow_dangerous_code=True, handle_parsing_errors=True
+        llm, temp_main.name, verbose=True, allow_dangerous_code=True
     )
     comments_agent = None
     if not df_comments.empty:
         comments_agent = create_csv_agent(
-            llm, temp_comments.name, verbose=False, allow_dangerous_code=True, handle_parsing_errors=True
+            llm, temp_comments.name, verbose=True, allow_dangerous_code=True
         )
 
     return main_agent, comments_agent
@@ -144,25 +148,60 @@ def handle_user_query(query, main_agent, comments_agent):
             raise e
 
 
-def try_parse_csv(text):
+# def try_parse_csv(text):
+#     try:
+#         # Try reading entire response as CSV
+#         df = pd.read_csv(StringIO(text))
+#         if df.shape[1] > 1:
+#             return df
+#     except Exception:
+#         pass
+
+#     # Try extracting a CSV block
+#     csv_block = re.search(r"((?:[^\n]*,)+[^\n]*\n(?:.*\n?)+)", text)
+#     if csv_block:
+#         try:
+#             df = pd.read_csv(StringIO(csv_block.group(1)))
+#             if df.shape[1] > 1:
+#                 return df
+#         except Exception:
+#             pass
+#     return None
+def try_parse_csv_or_table(text):
+    from io import StringIO
+
+    # Try CSV code block
+    csv_block = re.search(r"```csv\n(.*?)```", text, re.DOTALL)
+    if csv_block:
+        try:
+            return pd.read_csv(StringIO(csv_block.group(1)))
+        except Exception:
+            pass
+
+    # Try plain CSV
     try:
-        # Try reading entire response as CSV
         df = pd.read_csv(StringIO(text))
-        if df.shape[1] > 1:
+        if not df.empty and df.shape[1] > 0:
             return df
     except Exception:
         pass
 
-    # Try extracting a CSV block
-    csv_block = re.search(r"((?:[^\n]*,)+[^\n]*\n(?:.*\n?)+)", text)
-    if csv_block:
-        try:
-            df = pd.read_csv(StringIO(csv_block.group(1)))
-            if df.shape[1] > 1:
-                return df
-        except Exception:
-            pass
+    # Try markdown table (e.g. | Employee Name | ...)
+    try:
+        lines = text.strip().splitlines()
+        table_lines = [line for line in lines if '|' in line and not line.strip().startswith("#")]
+        if len(table_lines) >= 2:
+            raw_table = '\n'.join(table_lines)
+            df = pd.read_csv(StringIO(raw_table), sep="|", engine="python", skipinitialspace=True)
+            df = df.dropna(axis=1, how='all')  # Drop empty columns created by separators
+            df.columns = [col.strip() for col in df.columns]
+            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            return df
+    except Exception:
+        pass
+
     return None
+
 
 
 # --- Cleanup Output ---
@@ -272,7 +311,7 @@ if uploaded_file:
                 is_structured = response["is_structured"]
 
                 # Try parsing CSV
-                parsed_df = try_parse_csv(result)
+                parsed_df = try_parse_csv_or_table(result)
 
                 with st.chat_message("assistant"):
                     
