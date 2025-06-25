@@ -44,6 +44,123 @@ def get_enriched_prompt(query):
     # Keywords that *strongly* imply needing tabular output
     csv_keywords = ["list", "show", "filter", "table", "display", "all employees", "summary of", "csv","tabular", "structured", "answer in table format", "answer in csv format", "answer in tabular format", "answer in structured format"]
 
+
+    # Explicit column-to-values mapping (custom guide for disambiguation)
+    column_value_guide = {
+    "Resource Pool": [
+        "JavaScript", "CSS", "QA", "Java", "Project Management", "Finance", "Ruby",
+        "Management", "IT", "QA-Auto", "QA-Manual", "Graphics", "ADMIN", "Microsoft",
+        "Sales & Mkting", ".Net", "Angular", "Mobile", "HR", "Recruitment", "BA",
+        "Purchase", "PHP", "Footage Review", "Image Review", "Stock Photography",
+        "Image Moderation", "Video Editing", "Salesforce", "FrontEnd", "Front End Website Developer",
+        "Research", "SEO-SEM-SMM", "Content", "MIS", "Content Writing", "Writing",
+        "Data Enrichment", "iOS development", "React JS", "Marketing", "Workday",
+        "Training", "Android", "Cloud Computing", "Design", "UI/UX", "Python",
+        "SQL,DB", "Mongo DB", "RPA", "HR-MIS", "Gurmukhi script", "DevOps", ".Netcore",
+        "L&D", "Shopify Platform", "Testing", "UI", "RMG", "QA Lead",
+        "Resource Management and Bench Management", "UI/UX Design", "LAN/WAN", "Analyst",
+        "System Admin", "Technical Scale", "Databricks", "Snowflake", "ROR",
+        "Marketing Cloud", "Compliance Reviewer", "Salesforce CRM", "AWS",
+        "Team Management", "Azure DevOps", "Service Cloud", "AWS Cloud Support",
+        "HTML/CSS", "AWS Salesforce", "Azure and Gen AI", "Account Management",
+        "Site Auditor", "PostgreSQL", "Data Engineering", "Salesforce Support",
+        "Katalon Automation Engineer", "Accounting", "Fullstack", "Business Development",
+        "Chartered Accountant", "Automation engineer", "Business Analyst",
+        "Power automate", "Mulesoft", "Tamil Writer", "Mobile Development",
+        "Bhojpuri Writer"
+    ],
+    "Primary Skills": [
+        "Vue JS", "css 3", "QA-MANUAL", "Api testing", "Java", "Ruby/Rails",
+        "Accounting - Quickbooks", "nodejs", "UI/UX", "Team Management", "O365 Administration",
+        "QA-AUTO", "Administration", "ExpressJs", "sketch", "Admin Backend Support",
+        "microsoft", ".Net", ".Net Core", "Salesforce", "Project Management",
+        "Delivery Leadership", "Software Testing", "Android", "HR Management",
+        "Recruitment", "Business Analysis", "Angular", "Angular 16", "Purchase",
+        "excel", "functional testing", "css", "React JS", "javascript", "AWS",
+        "html5/css3", "ITIL", "Accounting - Tally", "Asset Management", "Admin Front Desk",
+        "photoshop", "PHP", "video reviewing", "image reviewing", "video editing",
+        "APEX development - Salesforce", "hmtl5", "CPQ", "Firewall Administration",
+        "Typescript", "Marketing", "image editing", "Film Making", "Angular 8.0",
+        "Digital Marketing", "Networking", "manual testing", "Lightning Components",
+        "Marketing cloud", "Data Science", "Branding", "Copywriter", "Design",
+        "Data Enrichment", "data entry", "Datorama", "Salesforce Administrator",
+        "Salesforce DevOps (CD/CI)", "bootstrap 3", "Customer Support-Email",
+        "Workday", "xml", "ASP.NET", "Salesforce- Marketing cloud", "core java",
+        "Python", "amazon web services", "Monitoring", "ElasticSearch",
+        "Technical Troubleshooting", "Program Management", "Cloud", "Lightning Web Components",
+        "Sales Cloud", "Content writing", "GCP", "Java Spring Boot", "SQL",
+        "Graphics Design", "Customer Success", "MongoDB", "Automation-Playwright Test",
+        "UiPath", "Script Writing", "Gurmukhi script", "Resource Management and Bench Management",
+        "React", "MIS", "L&D", "Resource Management", "Shopify Platform", "Onboarding",
+        "Data Engineering", "Active Directory", "Kafka", "Sales", "Email Campaign",
+        "Spring Boot", "Java 8", "GitHub", "Research and Curation", "Performance Testing",
+        "image reviewing; image reviewing", "Ansible", "Desktop Support", "Business & Function",
+        "Production support", "Power BI", "Customer Support", "Postgres", "HTML/CSS",
+        "Salesforce Developer", "Chartered Accountant", "BRD", "Power Automate", "selenium",
+        "mule", "Photography", "Kotlin"
+    ],
+    "Employment Status": [
+        "3rd Party Contract", "Confirmed", "Probation", "On Notice",
+        "Probation Extended", "Direct Contract"
+    ],
+    "Project Name": [
+        "0339-Rev-CCMH-Proj-CCMH", "0359-Rev-Parkofon-Proj-Sheeva-ai", "0328-Rev-AboveBoard-Proj-AboveBoard",
+        "0241-Rev-Vet24seven-PROJ-Vet24seven", "5501-Inv-V2Solutions-Proj-Digital Engineering Bench",
+        "0249-Rev-Specialty Inspection-Proj-Specialty", "6003-Inv-V2Solutions-OPS-Finance",
+        "0220-Rev-Shoulet Blunt-Proj-Imago", "5401-Inv-V2Solutions-Proj-Digital Experience Bench",
+        "6001-Inv-V2Solutions-OPS-Corporate", "0408-Rev-Imdex-Proj-Imdex", "0366-Rev-Natural Retreats-Proj-Natural Retreats",
+        "6005-Inv-V2Solutions-OPS-IT", "0405-Rev-Entelect-Proj-Entelect", "0196-Rev-Shutterstock-Proj-Shutterstock",
+        "0390-Rev-Pension Technology-Proj-Pension Technology", "6001-Inv-V2Solutions-OPS-Corporate-US",
+        "6007-Inv-V2Solutions-OPS-Admin & Purchase", "0339-Rev-CCMH-Proj-CCMH-US", "7121-Inv-V2Solutions-Proj-Sales-US",
+        "7201-Inv-V2Solutions-Proj-S&I-US", "7111-Inv-V2Solutions-Proj-Others AM-US", "5703-Inv-V2Solutions-Proj-Salesforce S&M - US",
+        "5519-Inv-V2Solutions-Proj-Digital Engineering VWR Rewrite", "0231-Rev-Adobe-Proj-Backlog Review",
+        "0231-Rev-Adobe-Proj-Site Audit", "0336-Rev-ThriveTRM-Proj-ThriveTRM", "6002-Inv-V2Solutions-OPS-BU-HR",
+        "6002-Inv-V2Solutions-OPS-TAG", "0185-Rev-LendingTree-Proj-LendingTree", "0407-Rev-HealthEdge-Proj-HealthEdge",
+        "0398-Rev-Sunnova-Proj-Sunnova", "6011-Inv-V2Solutions-OPS-Inventory", "0404-Rev-Vendelux-Proj-Vendelux",
+        "5703-Inv-V2Solutions-Proj-Salesforce S&M", "0327-Rev-Rubrik-Proj-Rubrik", "5702-Inv-V2Solutions-Proj-Digital Platform Competency Building",
+        "0263-Rev-Kyra Solutions -Proj-Kyra Transportation MVP", "0334-Rev-Realm-Proj-Realm", "5706-Inv-V2Solutions-Proj-Digital Platform Internal Project",
+        "5701-Inv-V2Solutions-Proj-Digital Platform Bench", "0403-Rev-We Insure-Proj-We Insure", "0361-Rev-Pacaso-Proj-Pacaso",
+        "0263-Rev-Kyra Solutions -Proj-Kyra", "0315-Rev-LuminaDatamatics-Proj-LuminaDatamatics", "5405-Inv-V2Solutions-Proj-DCT Tool",
+        "7152-Inv-V2Solutions-Proj-Marketing", "0275-Rev-RentalBeast-Proj-Content Service-Research & Sourcing", "3007-Rev-FNS-Proj-V2Solutions",
+        "0348-Rev-ValleyROP-Proj-ValleyROP", "0399-Rev-Implentio-Proj-Implentio", "0354-Rev-Twitch-Proj-Twitch",
+        "0401-Rev-Fieldist-Proj-Fieldist", "0275-Rev-RentalBeast-Proj-RentalBeast", "7123-Inv-V2Solutions-Proj-Inside Sales",
+        "5201-Inv-V2Solutions-Proj-Content Service Bench", "0309-Rev-LyricFind-Proj-LyricFind", "5517-Inv-V2Solutions-Proj-Digital Engineering Internal Project VWR",
+        "0213-Rev-iSpot_Drmetrix-Proj-DRmetrix - Phase II", "0320-Rev-GroupBy-Proj-GroupBy DEngg", "0351-Rev-Right Skale-Proj-Bespin",
+        "0351-Rev-Right Skale-Proj-Pure Storage", "0196-Rev-Shutterstock-Proj-Sales Process Documentation", "7112-Inv-V2Solutions-Proj-Others AM",
+        "7125-Inv-V2Solutions-Proj-Enterprise Sales", "7120-Inv-V2Solutions-Proj-Sales", "0362-Rev-First National Bank-Proj-FNB",
+        "0362-Rev-First National Bank-Proj-FNB-US", "7151-Inv-V2Solutions-Proj-Marketing-US", "0402-Rev-Auro Wellness-Proj-Auro Wellness",
+        "0365-Rev-JustCall-Proj-JustCall", "0203-Rev-Avail-Proj-Avail", "0397-Rev-Monday.Com-Proj-Monday.Com",
+        "0394-Rev-Rev.Com-Proj-Rev.Com", "0270-Rev-HealthCare-Solutions-Proj-HCS", "0217-Rev-CureMD-Proj-CureMD",
+        "0325-Rev-Kin Insurance-Proj-Kin Insurance", "0369-Rev-Otter.ai-Proj-Otter.ai", "6002-Inv-V2Solutions-OPS-TAG-US"
+    ],
+    "Availability Status": [
+        "Available for billing", "Mapped for future billing opportunity", "Not Available for billing", "Management"
+    ],
+    "Billable Status": [
+        "Billable", "Non Billable"
+    ],
+    "Employment Type": [
+        "Contractor", "FTE"
+    ],
+    "Sub Practice Area": [
+        "Salesforce S&M", "Digital Engineering", "Digital Platform", "Inside Sales", "Salesforce S&M - US",
+        "Digital Platform Competency Building", "Digital Platform Internal Project", "Enterprise Sales", "Sales",
+        "Others AM", "Marketing", "Digital Engineering Bench", "Digital Experience Bench", "Content Service Bench",
+        "Salesforce Support"
+    ],
+    "Business Unit": [
+        "V2Solutions", "Digital Platform", "Sales & Marketing"
+    ]
+}
+
+
+    # Convert mapping to string
+    guide_lines = ["**Column-to-Value Reference (for disambiguation):**"]
+    for col, values in column_value_guide.items():
+        values_str = ", ".join(values)
+        guide_lines.append(f"- {col}: {values_str}")
+    guide_text = "\n".join(guide_lines)
+
     if any(kw in query_lower for kw in csv_keywords):
         context = (
             # "You are a data analyst with access to a dataset. "
@@ -62,15 +179,18 @@ def get_enriched_prompt(query):
         "Return the CSV inside a code block marked with ```csv and ``` so that it is easy to extract."
         "Example:\n```csv\nEmployee Name\nJohn Doe\nJane Smith\n```\n"
         "Ensure exact matching by converting both dataset and input to lowercase and removing whitespace.\n"
+        f"{guide_text}\n\n"
 
         )
     else:
         context = (
             "You are a data analyst with access to a dataset. "
             "Respond to the user's query in natural language. "
-            "If My Query asks for comment. Do not truncate the comment. Do not add your own explanation. Just return the full comment."
+            "If My Query asks for comment.**return the full comment exactly as it appears in the data without any truncation or summarization.**. Do not add your own explanation. Just return the full comment."
             "Ensure exact match filtering where possible by converting both dataset values and user inputs to lowercase and trimming whitespace."
             "Only use CSV format if the user explicitly asks for tabular or structured output."
+            f"{guide_text}\n\n"
+
         )
 
     return f"{context}\n\nUser Query: {query}"
