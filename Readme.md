@@ -1,91 +1,185 @@
-# Excel Q&A Agent with Comments Support
+<!--
+  SEO: This README intentionally includes clear, keyword-rich headings and content
+  to improve discoverability for searches like: Excel chatbot, Excel AI chat,
+  LangChain CSV agent, Streamlit Excel Q&A, Google Gemini Excel assistant,
+  ask questions about Excel, talk to Excel, analyze spreadsheet with AI.
+-->
 
-A Streamlit web app that allows you to upload an Excel file and ask questions about your data using natural language. The app leverages Google Generative AI (Gemma) via LangChain to answer queries, including those related to comments or feedback columns in your dataset.
+# Excel Chatbot (Streamlit + LangChain + Google Gemini)
+
+[![Stars](https://img.shields.io/github/stars/jambhaleAnuj/Excel_AI_Chat?style=social)](https://github.com/jambhaleAnuj/Excel_AI_Chat/stargazers)
+[![CI](https://github.com/jambhaleAnuj/Excel_AI_Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/jambhaleAnuj/Excel_AI_Chat/actions/workflows/ci.yml)
+[![Issues](https://img.shields.io/github/issues/jambhaleAnuj/Excel_AI_Chat)](https://github.com/jambhaleAnuj/Excel_AI_Chat/issues)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENCE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![LangChain](https://img.shields.io/badge/Powered%20by-LangChain-1C3C3C)](https://python.langchain.com)
+
+Ask questions about your Excel spreadsheets using natural language. Upload a .xlsx file and get answers as clean tables or summaries. The app uses LangChain CSV agents powered by Google Gemini to understand your data—including targeted Q&A over Comments/Feedback columns.
+
+> Looking for: Excel chatbot, Excel Q&A, talk to Excel, query Excel with AI, spreadsheet assistant, CSV agent, Streamlit chatbot for Excel.
+
+---
+
+## Table of Contents
+
+- Overview
+- Features
+- Quickstart
+- Configuration (API Key)
+- Usage Examples
+- How it Works
+- Troubleshooting
+- FAQ
+- Contributing
+- License
+
+---
+
+## Overview
+
+Excel Chatbot is a lightweight Streamlit web app that lets you chat with your Excel data. It:
+
+- accepts Excel (.xlsx) uploads
+- answers questions in plain English
+- returns results as tables when you ask for lists/filters
+- can focus specifically on a Comments column for feedback analysis
+
+This project is ideal for analysts, HR/PeopleOps, and teams who need quick insights from spreadsheets without writing formulas.
 
 ---
 
 ## Features
-- **Upload Excel files** (`.xlsx`)
-- **Ask questions** about your data in plain English
-- **Handles comments/feedback** columns separately for targeted queries
-- **Displays results** as tables or text, depending on the query
+
+- Upload Excel files (.xlsx)
+- Natural-language questions ("Show all employees in Sales")
+- Structured results (CSV/table) when requested
+- Comments/Feedback-aware queries
+- Chat history sidebar with delete/clear
+- Works locally; no data leaves your machine except to the LLM provider
 
 ---
 
-## Installation
+## Quickstart
 
-### 1. Clone the Repository
+1. Clone the repo
+
+    ```powershell
+    git clone https://github.com/jambhaleAnuj/Excel_AI_Chat.git
+    cd Excel_AI_Chat
+    ```
+
+1. Create and activate a virtual environment (Windows PowerShell)
+
+    ```powershell
+    python -m venv .venv
+    ./.venv/Scripts/Activate.ps1
+    ```
+
+1. Install dependencies
+
+    ```powershell
+    pip install -r requirements.txt
+    ```
+
+1. Configure your Google Generative AI key
+
+    ```powershell
+    $env:GOOGLE_API_KEY = "your-google-api-key"
+    ```
+
+1. Run the app
+
+    ```powershell
+    streamlit run app.py
+    ```
+
+Open the URL shown (usually [http://localhost:8501](http://localhost:8501)), upload an Excel file, and start asking questions.
+
+---
+
+## Configuration (API Key)
+
+Get a key from Google AI Studio: <https://aistudio.google.com/app/apikey>
+
+Set it via environment variable (recommended):
+
 ```powershell
-git clone https://github.com/jambhaleAnuj/Excel_AI_Chat.git
-cd Excel_chat_streamlit 
+$env:GOOGLE_API_KEY = "your-google-api-key"
 ```
 
-### 2. Set Up a Python Environment (Recommended)
-It is recommended to use a virtual environment:
-```powershell
-python -m venv venv
-.\venv\Scripts\activate
-```
+Or configure Streamlit secrets (for deployment):
 
-### 3. Install Dependencies
-```powershell
-pip install -r requirements.txt
-```
+- .streamlit/secrets.toml
 
-### 4. Set Up Google Generative AI API Key
-- Obtain an API key for Google Generative AI (Gemma) from [Google AI Studio](https://aistudio.google.com/app/apikey).
-- You can set the key in your environment variables or directly in the code (for demo purposes, the key is hardcoded in `app.py`).
-- **For production, use environment variables or Streamlit secrets for security.**
-
-#### To set as an environment variable (Windows PowerShell):
-```powershell
-$env:GOOGLE_API_KEY="your-google-api-key"
+```toml
+GOOGLE_API_KEY = "your-google-api-key"
 ```
 
 ---
 
-## Usage
+## Usage Examples
 
-### 1. Start the Streamlit App
-```powershell
-streamlit run app.py
-```
+- List employees in the Sales department.
+- List the names of employees whose status is internal project (answer in table format).
+- Show comments for employee Jane Smith (don’t truncate).
+- Give a summary of feedback for the marketing team.
 
-### 2. In Your Browser
-- Open the provided local URL (usually `http://localhost:8501`)
-- Upload your Excel file (`.xlsx`)
-- Enter your question in the text box (e.g., "Show all employees in the Sales department" or "List all comments for John Doe")
-- View the AI-generated response as a table or text
+Tip: For tabular output, include phrases like “list”, “table”, “csv”, “show”, or “filter”.
 
 ---
 
-## Example Queries
-- `List all employees with a rating above 4.`
-- `Show comments for employee Jane Smith.`
-- `Summarize the feedback for the marketing team.`
+## How it Works
 
----
-
-## Notes
-- The app processes your Excel data in-memory and does not store files.
-- For best results, ensure your Excel file has clear headers and, if using comments, a column named `Comments`.
-- The AI model may take a few seconds to respond, depending on query complexity and API speed.
+- The app loads your Excel into pandas.
+- It builds two LangChain CSV agents: one for the main data and one focused on the Comments column.
+- A small prompt-engineering layer encourages the model to return CSV when your query asks for structured output.
+- The app tries to parse CSV/table-like answers and renders them as a Streamlit dataframe. If the model replies in natural language, you’ll see it as chat text.
 
 ---
 
 ## Troubleshooting
-- **ModuleNotFoundError**: Ensure all dependencies are installed with `pip install -r requirements.txt`.
-- **API Key Errors**: Double-check your Google API key and environment variable setup.
-- **Excel Read Errors**: Make sure your file is `.xlsx` format and not open in another program.
+
+- ModuleNotFoundError: Run `pip install -r requirements.txt`.
+- API key issues: Ensure GOOGLE_API_KEY is set in your shell or Streamlit secrets.
+- Excel read errors: Use .xlsx and ensure the file is not open elsewhere.
+- Output looks like a single line but should be a table: Ask explicitly for “answer in table/csv format”. The app also auto-parses common single-column formats.
+
+---
+
+## FAQ
+
+Q: Does my data get uploaded to the internet?
+
+A: The file is processed locally, but your prompts and extracted context go to the LLM provider. Don’t use sensitive data.
+
+Q: Can I use OpenAI or another LLM?
+
+A: The code is structured around LangChain CSV agents. You can swap the model with a compatible LangChain chat model.
+
+Q: How do I deploy?
+
+A: You can deploy on Streamlit Community Cloud or any platform that runs Streamlit (ensure GOOGLE_API_KEY is configured as a secret).
+
+---
+
+## Contributing
+
+Contributions are welcome! See CONTRIBUTING.md for how to report bugs, request features, and open pull requests.
+
+If you find this useful:
+
+- Star the repo to help others discover it
+- Share it on social media or your team chat
 
 ---
 
 ## License
-This project is for educational/demo purposes. Please secure your API keys and do not share sensitive data.
+
+MIT — see LICENCE.
 
 ---
 
-## Credits
-- [Streamlit](https://streamlit.io/)
-- [LangChain](https://python.langchain.com/)
-- [Google Generative AI](https://aistudio.google.com/)
+_Extra keywords to help search engines index relevant phrases:_
+
+excel chatbot, excel ai, streamlit excel chatbot, talk to excel, query excel with ai, excel q&a, spreadsheet chatbot, csv agent, langchain excel, google gemini excel, hr feedback analysis excel, employee comments analysis, excel analytics ai, data assistant for excel

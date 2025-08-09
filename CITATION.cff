@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "Excel Chatbot: Ask Questions About Excel with AI (Streamlit + LangChain + Google Gemini)"
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Jambhale
+    given-names: Anuj
+repository-code: "https://github.com/jambhaleAnuj/Excel_AI_Chat"
+license: MIT
+year: 2025

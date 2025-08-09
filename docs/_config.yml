@@ -1,0 +1,4 @@
+title: Excel Chatbot
+logo: /assets/logo.png
+theme: minima
+description: Chat with Excel spreadsheets using AI (Streamlit + LangChain + Google Gemini)

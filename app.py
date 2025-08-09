@@ -10,8 +10,12 @@ import re
 import json
 from pathlib import Path
 
-# Set up Google API Key
-os.environ["GOOGLE_API_KEY"] = "AIzaSyDIYgJ01me6YE6yAzaJkyeZx3jHGxWKAR0"
+# Set up Google API Key (from env or Streamlit secrets)
+api_key = st.secrets.get("GOOGLE_API_KEY", os.getenv("GOOGLE_API_KEY"))
+if not api_key:
+    st.error("Google API key missing. Set GOOGLE_API_KEY in environment or .streamlit/secrets.toml")
+    st.stop()
+os.environ["GOOGLE_API_KEY"] = api_key
 
 # --- File Path for History ---
 HISTORY_FILE = Path("chat_history.json")

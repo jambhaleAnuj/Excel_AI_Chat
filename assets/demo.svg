@@ -1,0 +1,32 @@
+<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Demo: Upload → Ask → Table">
+  <style>
+    .card{fill:#0f172a;stroke:#334155;stroke-width:2}
+    .t{font: 600 18px 'Segoe UI',Roboto,Arial; fill:#e2e8f0}
+    .s{font: 400 14px 'Segoe UI',Roboto,Arial; fill:#cbd5e1}
+  </style>
+  <rect width="960" height="540" fill="#0b1220"/>
+  <g transform="translate(40,40)">
+    <rect class="card" width="260" height="140" rx="12"/>
+    <text class="t" x="16" y="36">1) Upload Excel (.xlsx)</text>
+    <text class="s" x="16" y="70">Drag & drop or select your spreadsheet.</text>
+  </g>
+  <g transform="translate(350,40)">
+    <rect class="card" width="260" height="140" rx="12"/>
+    <text class="t" x="16" y="36">2) Ask a question</text>
+    <text class="s" x="16" y="70">e.g., "List internal project employees (table)."</text>
+  </g>
+  <g transform="translate(660,40)">
+    <rect class="card" width="260" height="140" rx="12"/>
+    <text class="t" x="16" y="36">3) Get results</text>
+    <text class="s" x="16" y="70">Table or summary, depending on your query.</text>
+  </g>
+  <g transform="translate(40,220)">
+    <rect class="card" width="880" height="260" rx="12"/>
+    <text class="t" x="16" y="40">Preview</text>
+    <rect x="16" y="60" width="848" height="2" fill="#334155"/>
+    <text class="s" x="16" y="92">Employee Name, Status</text>
+    <text class="s" x="16" y="118">chaitali girnar, internal project</text>
+    <text class="s" x="16" y="144">chinmoy sahoo, internal project</text>
+    <text class="s" x="16" y="170">...</text>
+  </g>
+</svg>
