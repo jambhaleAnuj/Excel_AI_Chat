@@ -15,9 +15,21 @@
 [![Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![LangChain](https://img.shields.io/badge/Powered%20by-LangChain-1C3C3C)](https://python.langchain.com)
 
+![Banner](assets/banner.svg)
+
 Ask questions about your Excel spreadsheets using natural language. Upload a .xlsx file and get answers as clean tables or summaries. The app uses LangChain CSV agents powered by Google Gemini to understand your data—including targeted Q&A over Comments/Feedback columns.
 
 > Looking for: Excel chatbot, Excel Q&A, talk to Excel, query Excel with AI, spreadsheet assistant, CSV agent, Streamlit chatbot for Excel.
+
+---
+
+## Demo
+
+![Demo](assets/demo.svg)
+
+Optional: Deploy on Streamlit Cloud
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
 
 ---
 
