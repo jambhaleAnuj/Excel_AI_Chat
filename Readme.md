@@ -25,7 +25,9 @@ Ask questions about your Excel spreadsheets using natural language. Upload a .xl
 
 ## Demo
 
-![Demo](assets/demo.svg)
+![Demo](assets/demo1.png)
+![Demo](assets/demo2.png)
+
 
 Optional: Deploy on Streamlit Cloud
 
